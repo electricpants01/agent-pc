@@ -17,8 +17,7 @@
 
 ## Code Conventions
 
-- **Variables/functions/classes:** English
-- **Comments/docstrings:** Spanish
+- **All code and comments:** English
 - **PEP 8** with 4-space indentation
 - Type hints where they add clarity
 - Tool functions return `{"ok": bool, ...}` dict

@@ -2,9 +2,9 @@
 # Agent-PC — Docker Compose Stack
 # ============================================
 # Servicios:
-#   - open-webui  : Cerebro multi-modelo (OpenAI, Gemini, DeepSeek, Ollama)
+#   - open-webui  : Multi-model brain (OpenAI, Gemini, DeepSeek, Ollama)
 #   - agent-pc    : Tool execution engine (SSH → host)
-#   - ollama      : Modelos LLM locales (opcional)
+#   - ollama      : Local LLM models (optional)
 #   - tailscale   : VPN mesh para acceso remoto seguro
 # ============================================
 
@@ -12,7 +12,7 @@ version: "3.9"
 
 services:
   # ============================================
-  # 1. Open WebUI — Cerebro Multi-Modelo 🧠
+  # 1. Open WebUI — Multi-Model Brain 🧠
   # ============================================
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
@@ -22,7 +22,7 @@ services:
       - "${OPENWEBUI_PORT:-3000}:8080"
     volumes:
       - open-webui-data:/app/backend/data
-      # Opcional: montar tools personalizadas de Agent-PC
+      # Optional: montar custom Agent-PC tools
       - ./open-webui/tools:/app/backend/data/tools:ro
     environment:
       # Si usas Ollama local, descomenta:
@@ -52,9 +52,9 @@ services:
     ports:
       - "${AGENTPC_PORT:-8765}:8765"
     volumes:
-      # Montar ~/.ssh para acceder al host vía SSH
+      # Mount ~/.ssh to access host via SSH
       - ${HOME}/.ssh:/home/agentpc/.ssh:ro
-      # Opcional: montar workspace del host
+      # Optional: mount host workspace
       - ${WORKSPACE_ROOT:-${HOME}}:${WORKSPACE_ROOT:-/home/agentpc/workspace}:rw
     environment:
       # Server
@@ -80,7 +80,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   # ============================================
-  # 3. Ollama — Modelos Locales (Opcional) 🦙
+  # 3. Ollama — Local Models (Optional) 🦙
   # ============================================
   ollama:
     image: ollama/ollama:latest
@@ -101,12 +101,12 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]  # Opcional: GPU para inferencia más rápida
+              capabilities: [gpu]  # Optional: GPU for faster inference
     networks:
       - agent-pc-net
 
   # ============================================
-  # 4. Tailscale — VPN Mesh (Opcional) 🔐
+  # 4. Tailscale — VPN Mesh (Optional) 🔐
   # ============================================
   tailscale:
     image: tailscale/tailscale:latest
@@ -129,7 +129,7 @@ services:
     privileged: true
 
 # ============================================
-# Volúmenes persistentes
+# Persistent volumes
 # ============================================
 volumes:
   open-webui-data:
@@ -140,7 +140,7 @@ volumes:
     name: agent-pc-tailscale-data
 
 # ============================================
-# Red interna para comunicación entre servicios
+# Internal network for inter-service communication
 # ============================================
 networks:
   agent-pc-net:

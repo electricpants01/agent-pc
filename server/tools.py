@@ -1,9 +1,9 @@
 # ============================================
 # Agent Tools — file ops, shell commands, etc.
 # ============================================
-# Las herramientas que Open WebUI puede llamar.
-# Se ejecutan localmente dentro del contenedor.
-# Para SSH al host, consultar config.py.
+# Tools that Open WebUI can call.
+# Executed locally inside the container.
+# For SSH to host, see config.py.
 # ============================================
 import os
 import subprocess
@@ -15,27 +15,27 @@ import config
 
 
 # ---- Tool Definitions (OpenAI function-calling format) ----
-# Open WebUI usa estas definiciones para tool-calling
+# Open WebUI uses these definitions for tool-calling
 TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
             "name": "read_file",
-            "description": "Lee el contenido de un archivo. Usa start_line/end_line para archivos muy largos.",
+            "description": "Read the contents of a file. Use start_line/end_line for very large files.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Ruta absoluta del archivo a leer.",
+                        "description": "Absolute path of the file to read.",
                     },
                     "start_line": {
                         "type": "integer",
-                        "description": "Línea inicial (1-based, opcional).",
+                        "description": "Starting line (1-based, optional).",
                     },
                     "end_line": {
                         "type": "integer",
-                        "description": "Línea final (1-based, opcional).",
+                        "description": "Ending line (1-based, optional).",
                     },
                 },
                 "required": ["path"],
@@ -46,17 +46,17 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "write_file",
-            "description": "Escribe o crea un archivo con el contenido especificado.",
+            "description": "Write or create a file with the specified content.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Ruta absoluta del archivo a escribir.",
+                        "description": "Absolute path of the file to write.",
                     },
                     "content": {
                         "type": "string",
-                        "description": "Contenido a escribir en el archivo.",
+                        "description": "Content to write to the file.",
                     },
                 },
                 "required": ["path", "content"],
@@ -67,17 +67,17 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "execute_command",
-            "description": "Ejecuta un comando de shell en el servidor Linux. Úsalo con cuidado.",
+            "description": "Execute a shell command on the Linux host. Use with caution.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "command": {
                         "type": "string",
-                        "description": "El comando shell a ejecutar (ej: 'ls -la', 'df -h').",
+                        "description": "The shell command to execute (e.g. 'ls -la', 'df -h').",
                     },
                     "timeout": {
                         "type": "integer",
-                        "description": "Timeout en segundos (default: 30).",
+                        "description": "Timeout in seconds (default: 30).",
                     },
                 },
                 "required": ["command"],
@@ -88,17 +88,17 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "list_directory",
-            "description": "Lista el contenido de un directorio.",
+            "description": "List the contents of a directory.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Ruta absoluta del directorio a listar.",
+                        "description": "Absolute path of the directory to list.",
                     },
                     "pattern": {
                         "type": "string",
-                        "description": "Patrón glob opcional (ej: '*.py').",
+                        "description": "Optional glob pattern (e.g. '*.py').",
                     },
                 },
                 "required": ["path"],
@@ -109,21 +109,21 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "search_files",
-            "description": "Busca archivos que contengan un patrón de texto (grep).",
+            "description": "Search for files containing a text pattern (grep).",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "pattern": {
                         "type": "string",
-                        "description": "Patrón regex o texto a buscar.",
+                        "description": "Regex pattern or text to search for.",
                     },
                     "directory": {
                         "type": "string",
-                        "description": "Directorio donde buscar (default: workspace root).",
+                        "description": "Directory to search in (default: workspace root).",
                     },
                     "file_pattern": {
                         "type": "string",
-                        "description": "Filtro de archivos (ej: '*.py', '*.md').",
+                        "description": "File filter (e.g. '*.py', '*.md').",
                     },
                 },
                 "required": ["pattern"],
@@ -132,27 +132,27 @@ TOOL_DEFINITIONS = [
     },
 ]
 
-SYSTEM_PROMPT = """Eres **Agent-PC**, un asistente de IA ejecutándose en una máquina Linux 24/7.
-Tu propósito es ayudar al usuario a controlar su computadora remotamente desde su iPhone.
+SYSTEM_PROMPT = """You are **Agent-PC**, an AI assistant running on a 24/7 Linux machine.
+Your purpose is to help the user control their computer remotely from any device.
 
-## Capacidades
-- Leer cualquier archivo del sistema (read_file)
-- Escribir/crear archivos (write_file)
-- Ejecutar comandos de shell (execute_command)
-- Listar directorios (list_directory)
-- Buscar en archivos (search_files)
+## Capabilities
+- Read any system file (read_file)
+- Write/create files (write_file)
+- Execute shell commands (execute_command)
+- List directories (list_directory)
+- Search within files (search_files)
 
-## Reglas
-1. **Responde en español** — el usuario habla español.
-2. **Sé conciso** — es una interfaz móvil, ve al grano.
-3. **Confirma antes de acciones destructivas** — pregunta antes de borrar archivos, matar procesos, etc.
-4. **Usa rutas absolutas** siempre.
-5. **El workspace root es {}** — opera dentro de este scope por seguridad.
+## Rules
+1. **Respond in English** — the user speaks English.
+2. **Be concise** — this is a remote interface, get to the point.
+3. **Confirm before destructive actions** — ask before deleting files, killing processes, etc.
+4. **Always use absolute paths**.
+5. **The workspace root is {}** — operate within this scope for safety.
 
-## Formato
-- Cuando ejecutes comandos, muestra qué hiciste y el resultado.
-- Si un comando falla, explica el error y sugiere alternativas.
-- Para archivos largos, usa start_line/end_line.
+## Format
+- When executing commands, show what you did and the result.
+- If a command fails, explain the error and suggest alternatives.
+- For large files, use start_line/end_line.
 """.format(config.WORKSPACE_ROOT)
 
 
@@ -176,7 +176,7 @@ def tool_read_file(path: str, start_line: int = None, end_line: int = None) -> d
                         "ok": True, "path": p,
                         "content": "\n".join(lines[:500]),
                         "total_lines": len(lines), "truncated": True,
-                        "note": f"Truncado a 500 lineas. Total: {len(lines)} lineas.",
+                        "note": f"Truncated to 500 lines. Total: {len(lines)} lines.",
                     }
                 return {"ok": True, "path": p, "content": content}
             else:
@@ -191,9 +191,9 @@ def tool_read_file(path: str, start_line: int = None, end_line: int = None) -> d
                     "total_lines": total, "shown_lines": f"{sl+1}-{el}",
                 }
     except FileNotFoundError:
-        return {"ok": False, "path": p, "error": "Archivo no encontrado."}
+        return {"ok": False, "path": p, "error": "File not found."}
     except PermissionError:
-        return {"ok": False, "path": p, "error": "Permiso denegado."}
+        return {"ok": False, "path": p, "error": "Permission denied."}
     except Exception as e:
         return {"ok": False, "path": p, "error": str(e)}
 
@@ -225,7 +225,7 @@ def tool_execute_command(command: str, timeout: int = 30) -> dict:
             "returncode": result.returncode,
         }
     except subprocess.TimeoutExpired:
-        return {"ok": False, "command": command, "error": f"Timeout tras {timeout}s."}
+        return {"ok": False, "command": command, "error": f"Timeout after {timeout}s."}
     except Exception as e:
         return {"ok": False, "command": command, "error": str(e)}
 
@@ -241,9 +241,9 @@ def tool_list_directory(path: str, pattern: str = None) -> dict:
             items = sorted(os.listdir(p))
         return {"ok": True, "path": p, "items": items[:200], "count": len(items)}
     except FileNotFoundError:
-        return {"ok": False, "path": p, "error": "Directorio no encontrado."}
+        return {"ok": False, "path": p, "error": "Directory not found."}
     except PermissionError:
-        return {"ok": False, "path": p, "error": "Permiso denegado."}
+        return {"ok": False, "path": p, "error": "Permission denied."}
     except Exception as e:
         return {"ok": False, "path": p, "error": str(e)}
 
@@ -280,6 +280,5 @@ def execute_tool(name: str, args: dict) -> dict:
     """Dispatch a tool call and return its result."""
     fn = TOOL_MAP.get(name)
     if not fn:
-        return {"ok": False, "error": f"Herramienta desconocida: {name}"}
+        return {"ok": False, "error": f"Unknown tool: {name}"}
     return fn(**args)
-

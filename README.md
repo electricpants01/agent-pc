@@ -1,164 +1,166 @@
 # Agent-PC 🖥️🧠
 
-Controla tu máquina Linux con IA desde cualquier dispositivo — sin instalar nada en el cliente.
+Control your Linux machine with AI from any device — install nothing on the client.
 
 ```
 ┌──────────────────────┐      Tailscale VPN      ┌──────────────────────────────────────┐
-│  CUALQUIER DISPOSITIVO│◄──────────────────────►│  Linux Server 24/7 (Docker)          │
-│                      │    Red privada mesh     │                                      │
+│  ANY DEVICE          │◄──────────────────────►│  Linux Server 24/7 (Docker)          │
+│                      │    Private mesh net    │                                      │
 │ • iPhone (PWA/Safari)│                         │  ┌────────────────────────────────┐  │
-│ • iPad               │                         │  │  🧠 Open WebUI (puerto 3000)   │  │
-│ • Mac/PC (navegador) │                         │  │  • Multi-modelo (GPT, Gemini,  │  │
-│ • 🎤 Voz → comando   │                         │  │    DeepSeek, Claude, Ollama)   │  │
-│                      │                         │  │  • Panel admin para API keys   │  │
-└──────────────────────┘                         │  │  • Chat + Voz + Streaming      │  │
+│ • iPad               │                         │  │  🧠 Open WebUI (port 3000)     │  │
+│ • Mac/PC (browser)   │                         │  │  • Multi-model (GPT, Gemini,   │  │
+│ • 🎤 Voice → command │                         │  │    DeepSeek, Claude, Ollama)   │  │
+│                      │                         │  │  • Admin panel for API keys    │  │
+└──────────────────────┘                         │  │  • Chat + Voice + Streaming    │  │
                                                  │  └──────────────┬─────────────────┘  │
                                                  │                 │                    │
                                                  │  ┌──────────────▼─────────────────┐  │
-                                                 │  │  🛠️ Agent-PC (puerto 8765)    │  │
+                                                 │  │  🛠️ Agent-PC (port 8765)      │  │
                                                  │  │  • Tool execution engine       │  │
                                                  │  │  • SSH → host machine          │  │
-                                                 │  │  • Lee/escribe archivos        │  │
-                                                 │  │  • Ejecuta comandos            │  │
+                                                 │  │  • Read/write files            │  │
+                                                 │  │  • Execute commands            │  │
                                                  │  └──────────────┬─────────────────┘  │
                                                  │                 │                    │
                                                  │  ┌──────────────▼─────────────────┐  │
-                                                 │  │  💻 Tu Máquina Linux           │  │
+                                                 │  │  💻 Your Linux Machine         │  │
                                                  │  │  • File system                 │  │
                                                  │  │  • Shell commands              │  │
-                                                 │  │  • Procesos, servicios, etc.   │  │
+                                                 │  │  • Processes, services, etc.   │  │
                                                  │  └────────────────────────────────┘  │
                                                  │                                      │
                                                  │  ┌────────────────────────────────┐  │
-                                                 │  │  🦙 Ollama (opcional)          │  │
-                                                 │  │  • Modelos locales privados    │  │
+                                                 │  │  🦙 Ollama (optional)          │  │
+                                                 │  │  • Private local models        │  │
                                                  │  └────────────────────────────────┘  │
                                                  │                                      │
                                                  │  ┌────────────────────────────────┐  │
                                                  │  │  🔐 Tailscale                  │  │
-                                                 │  │  • VPN mesh privada            │  │
+                                                 │  │  • Private mesh VPN            │  │
                                                  │  └────────────────────────────────┘  │
                                                  └──────────────────────────────────────┘
 ```
 
-## 🚀 Instalación Rápida (Docker)
+---
 
-### Requisitos
+## 🚀 Quick Start (Docker)
 
-- **Linux** con Docker y Docker Compose instalados
-- **Tailscale** instalado en el host y en tu iPhone (para acceso remoto)
-- API key de al menos un proveedor LLM (OpenAI, Gemini, DeepSeek...)
+### Requirements
 
-### 1. Clonar y configurar
+- **Linux** with Docker and Docker Compose installed
+- **Tailscale** installed on host and iPhone (for remote access)
+- API key for at least one LLM provider (OpenAI, Gemini, DeepSeek...)
+
+### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/tu-usuario/agent-pc.git
+git clone https://github.com/your-username/agent-pc.git
 cd agent-pc
 cp .env.docker .env
-nano .env  # Edita las variables
+nano .env  # Edit the variables
 ```
 
-### 2. Configurar SSH (para que Agent-PC ejecute comandos en el host)
+### 2. Configure SSH (for Agent-PC to run commands on host)
 
 ```bash
-# Asegúrate de tener servidor SSH en el host
+# Ensure SSH server is installed on the host
 sudo apt install openssh-server
 
-# Genera una clave si no tienes
+# Generate key if you don't have one
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
 
-# Autoriza tu propia clave
+# Authorize your own key
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-### 3. Levantar los servicios
+### 3. Start Services
 
 ```bash
-# Servicios base (Open WebUI + Agent-PC)
+# Base services (Open WebUI + Agent-PC)
 docker compose up -d
 
-# Con Ollama (modelos locales)
+# With Ollama (local models)
 docker compose --profile ollama up -d
 
-# Con Tailscale (VPN)
+# With Tailscale (VPN)
 docker compose --profile tailscale up -d
 
-# Todo junto
+# All together
 docker compose --profile ollama --profile tailscale up -d
 ```
 
-### 4. Abrir Open WebUI
+### 4. Open WebUI
 
 ```
 http://localhost:3000
 ```
 
-### 5. Configurar Open WebUI
+### 5. Configure Open WebUI
 
-1. Crea tu cuenta admin (primer acceso)
-2. Ve a **Admin Panel → Settings → Connections**
-3. Añade tus API keys:
-   - OpenAI: `https://api.openai.com/v1` + tu API key
-   - Google Gemini: tu API key
-   - DeepSeek: `https://api.deepseek.com/v1` + tu API key
+1. Create your admin account (first access)
+2. Go to **Admin Panel → Settings → Connections**
+3. Add your API keys:
+   - OpenAI: `https://api.openai.com/v1` + your API key
+   - Google Gemini: your API key
+   - DeepSeek: `https://api.deepseek.com/v1` + your API key
    - Ollama (local): `http://ollama:11434`
-4. Ve a **Admin Panel → Workspace → Functions**
-5. Importa `open-webui/tools/agent-pc-tools.json`
-6. Configura la variable `AUTH_SECRET` con el mismo valor de tu `.env`
+4. Go to **Admin Panel → Workspace → Functions**
+5. Import `open-webui/tools/agent-pc-tools.json`
+6. Set the `AUTH_SECRET` variable to match your `.env`
 
-### 6. Configurar Tailscale (acceso desde iPhone)
+### 6. Configure Tailscale (iPhone access)
 
 ```bash
-# En el host Linux
+# On the Linux host
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 
-# En tu iPhone: instala Tailscale desde App Store
-# Inicia sesión con la misma cuenta
+# On your iPhone: install Tailscale from App Store
+# Log in with the same account
 ```
 
-Ahora puedes acceder desde Safari en tu iPhone:
+Now access from Safari on your iPhone:
 ```
-http://100.x.x.x:3000  (IP de Tailscale de tu servidor)
+http://100.x.x.x:3000  (your server's Tailscale IP)
 ```
 
-**Tip:** En Safari iPhone, pulsa Compartir → "Añadir a pantalla de inicio" para tenerlo como app.
+**Tip:** In Safari on iPhone, press Share → "Add to Home Screen" to install it as an app.
 
 ---
 
 ## 🛠️ Agent-PC Server (Tool Engine)
 
-El servidor Agent-PC ahora es **solo un motor de ejecución de herramientas**. Open WebUI maneja toda la lógica de LLM.
+The Agent-PC server is now **only a tool execution engine**. Open WebUI handles all LLM logic.
 
 ### Endpoints
 
-| Método | Ruta | Descripción |
+| Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Health check |
-| GET | `/tools?secret=...` | Lista herramientas (OpenAI format) |
-| POST | `/tool?secret=...` | Ejecutar herramienta |
+| GET | `/tools?secret=...` | List tools (OpenAI format) |
+| POST | `/tool?secret=...` | Execute a tool |
 
-### Herramientas disponibles
+### Available Tools
 
-| Herramienta | Descripción |
-|-------------|-------------|
-| `execute_command` | Ejecutar comandos shell en el host |
-| `read_file` | Leer archivos del host |
-| `write_file` | Escribir/crear archivos en el host |
-| `list_directory` | Listar directorios |
-| `search_files` | Buscar en archivos (grep) |
+| Tool | Description |
+|------|-------------|
+| `execute_command` | Execute shell commands on the host |
+| `read_file` | Read files from the host |
+| `write_file` | Write/create files on the host |
+| `list_directory` | List directory contents |
+| `search_files` | Search files (grep) |
 
-### Probar el servidor
+### Test the Server
 
 ```bash
 # Health check
 curl http://localhost:8765/health
 
-# Listar herramientas
+# List tools
 curl "http://localhost:8765/tools?secret=agent-pc-local-secret-change-me"
 
-# Ejecutar un comando
+# Execute a command
 curl -X POST "http://localhost:8765/tool?secret=agent-pc-local-secret-change-me" \
   -H "Content-Type: application/json" \
   -d '{"name": "execute_command", "args": {"command": "df -h"}}'
@@ -166,62 +168,78 @@ curl -X POST "http://localhost:8765/tool?secret=agent-pc-local-secret-change-me"
 
 ---
 
-## 📱 Usar desde iPhone (sin compilar nada)
+## 📱 Use from iPhone (no compiling required)
 
-1. Instala **Tailscale** en tu iPhone desde la App Store
-2. Conéctate a tu tailnet (misma cuenta que el servidor)
-3. Abre Safari y ve a `http://<ip-tailscale-de-tu-server>:3000`
-4. Pulsa **Compartir → Añadir a pantalla de inicio**
-5. ¡Listo! Tienes Agent-PC como una app en tu home screen
+1. Install **Tailscale** on your iPhone from the App Store
+2. Connect to your tailnet (same account as the server)
+3. Open Safari and go to `http://<your-server-tailscale-ip>:3000`
+4. Tap **Share → Add to Home Screen**
+5. Done! Agent-PC appears as an app on your home screen
 
-### ¿Por qué no necesitas una app nativa?
+### Why don't you need a native app?
 
-Open WebUI es una **PWA** (Progressive Web App):
-- ✅ Funciona en cualquier navegador moderno
-- ✅ Soporte de voz nativo (Web Speech API de Safari)
-- ✅ Se instala en la pantalla de inicio como una app real
-- ✅ Chat streaming en tiempo real
-- ✅ Multi-modelo (cambia entre GPT, Gemini, DeepSeek, Ollama)
-- ✅ Historial de conversaciones
-- ✅ Sin compilar, sin Xcode, sin App Store
+Open WebUI is a **PWA** (Progressive Web App):
+- ✅ Works in any modern browser
+- ✅ Native voice support (Web Speech API in Safari)
+- ✅ Installs to home screen like a real app
+- ✅ Real-time chat streaming
+- ✅ Multi-model (switch between GPT, Gemini, DeepSeek, Ollama)
+- ✅ Conversation history
+- ✅ No compiling, no Xcode, no App Store
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
 ```
 docker-compose.yml
-├── open-webui (puerto 3000)    ← Cerebro multi-modelo
+├── open-webui (port 3000)    ← Multi-model brain
 │   ├── OpenAI API
 │   ├── Gemini API
 │   ├── DeepSeek API
 │   └── Ollama (local)
-├── agent-pc (puerto 8765)      ← Tool execution engine
+├── agent-pc (port 8765)      ← Tool execution engine
 │   └── SSH → Host machine
-├── ollama (puerto 11434)       ← Modelos locales [opcional]
-└── tailscale                   ← VPN mesh [opcional]
+├── ollama (port 11434)       ← Local models [optional]
+└── tailscale                 ← VPN mesh [optional]
 ```
+
+### Why Docker?
+
+- ✅ **Zero host dependencies** — only Docker needed
+- ✅ **One-command updates**: `docker compose pull && docker compose up -d`
+- ✅ **Isolation**: LLM and tool engine run in separate environments
+- ✅ **Portability**: works on any Linux with Docker
+
+### Why Open WebUI?
+
+- ✅ **Admin panel for API key management** — no file editing
+- ✅ **Native support for 10+ providers** (OpenAI, Gemini, DeepSeek, Claude, Ollama, etc.)
+- ✅ **OpenAI-compatible API** — any existing client works
+- ✅ **PWA** — use from any device without installing anything
+- ✅ **Tool pipeline** — delegates execution to Agent-PC server
 
 ---
 
-## 🛡️ Seguridad
+## 🛡️ Security
 
-- **Tailscale VPN**: todo el tráfico va encriptado por WireGuard
-- **Red interna Docker**: los servicios se comunican en red aislada
-- **AUTH_SECRET**: autenticación entre Open WebUI y Agent-PC
-- **SSH con clave**: el contenedor accede al host solo vía SSH autorizado
-- **Sin puertos expuestos a internet**: solo dentro de la tailnet
+- **Tailscale VPN**: all traffic is encrypted via WireGuard
+- **Isolated Docker network**: `agent-pc-network` only accessible between services
+- **AUTH_SECRET**: authentication between Open WebUI and Agent-PC
+- **SSH with key**: container accesses host only via authorized SSH
+- **No internet-exposed ports**: only accessible within tailnet
+- **Restricted workspace**: `WORKSPACE_ROOT` limits operation scope
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Docker Compose con Open WebUI + Agent-PC + Ollama
-- [x] Tool execution vía SSH al host
-- [x] Tailscale VPN para acceso remoto
-- [x] PWA para iPhone (cero código)
-- [ ] MCP (Model Context Protocol) para Agent-PC
-- [ ] Historial persistente con backups
-- [ ] Notificaciones push vía Open WebUI
-- [ ] Integración con Google Calendar, Gmail, etc.
-- [ ] Siri Shortcuts para comandos rápidos
+- [x] Docker Compose with Open WebUI + Agent-PC + Ollama
+- [x] Tool execution via SSH to host
+- [x] Tailscale VPN for remote access
+- [x] PWA for iPhone (zero code)
+- [ ] MCP (Model Context Protocol) for Agent-PC
+- [ ] Persistent history with backups
+- [ ] Push notifications via Open WebUI
+- [ ] Integration with Google Calendar, Gmail, etc.
+- [ ] Siri Shortcuts for quick commands

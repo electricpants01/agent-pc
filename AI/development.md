@@ -1,66 +1,67 @@
-# Agent-PC — Guía de Desarrollo
+# Agent-PC — Development Guide
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 agent-pc/
-├── docker-compose.yml           ← Orquestación de servicios
-├── .env.docker                  ← Variables de entorno para Docker
+├── docker-compose.yml           ← Service orchestration
+├── .env.docker                  ← Docker environment variables
 ├── docker/
 │   └── agent-pc/
-│       ├── Dockerfile           ← Imagen Python del tool engine
-│       └── entrypoint.sh        ← Script de arranque
+│       ├── Dockerfile           ← Python image for tool engine
+│       └── entrypoint.sh        ← Startup script
 ├── server/                      ← Agent-PC Server (Python)
 │   ├── main.py                  ← FastAPI app (3 endpoints)
-│   ├── tools.py                 ← Definición e implementación de tools
-│   ├── config.py                ← Configuración desde env vars
-│   ├── requirements.txt         ← Dependencias Python
-│   ├── .env.example             ← Ejemplo de configuración
-│   ├── agent.py                 ← [LEGACY] Cliente LLM (ya no usado)
-│   ├── setup.sh                 ← [LEGACY] Instalación sin Docker
-│   └── agent-pc.service         ← [LEGACY] Servicio systemd
+│   ├── tools.py                 ← Tool definitions + implementations
+│   ├── config.py                ← Env var configuration
+│   ├── requirements.txt         ← Python dependencies
+│   ├── .env.example             ← Config template
+│   ├── agent.py                 ← [LEGACY] LLM client (no longer used)
+│   ├── setup.sh                 ← [LEGACY] Non-Docker install
+│   └── agent-pc.service         ← [LEGACY] systemd service
 ├── open-webui/
 │   └── tools/
-│       └── agent-pc-tools.json  ← Tools para importar en Open WebUI
-├── ios/                         ← [LEGACY] App iOS SwiftUI (backup)
-├── AI/                          ← Documentación para agentes AI
+│       └── agent-pc-tools.json  ← Tools for Open WebUI import
+├── ios/                         ← [LEGACY] SwiftUI iOS app (backup)
+├── AI/                          ← AI agent documentation
+│   ├── index.md
 │   ├── architecture.md
 │   ├── development.md
 │   ├── deployment.md
 │   └── conventions.md
-├── .clinerules/                 ← Reglas para Cline
-├── .cursor/rules/               ← Reglas para Cursor
-└── README.md                    ← Documentación principal
+├── .clinerules/                 ← Cline rules
+├── .cursor/rules/               ← Cursor IDE rules
+└── README.md                    ← Main documentation
 ```
 
-## Stack Tecnológico
+## Tech Stack
 
-| Componente | Tecnología | Versión |
+| Component | Technology | Version |
 |------------|-----------|--------|
-| Contenedores | Docker + Docker Compose | 3.9+ |
+| Containers | Docker + Docker Compose | 3.9+ |
 | LLM Brain | Open WebUI | latest (main) |
 | Tool Engine | Python + FastAPI | 3.11, 0.115.6 |
 | SSH | asyncssh | 2.19.0 |
 | VPN | Tailscale (WireGuard) | latest |
-| Modelos locales | Ollama | latest |
-| Cliente | PWA (Web Speech API) | Navegador moderno |
+| Local models | Ollama | latest |
+| Client | PWA (Web Speech API) | Modern browser |
 
-## Comandos Útiles
+## Useful Commands
 
-### Desarrollo Local
+### Local Development
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 cd server
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Correr servidor en desarrollo
+# Run server in development
 cp .env.example .env
 python main.py
 
-# Probar endpoints
+# Test endpoints
 curl http://localhost:8765/health
 curl "http://localhost:8765/tools?secret=agent-pc-local-secret-change-me"
 curl -X POST "http://localhost:8765/tool?secret=agent-pc-local-secret-change-me" \
@@ -71,43 +72,43 @@ curl -X POST "http://localhost:8765/tool?secret=agent-pc-local-secret-change-me"
 ### Docker
 
 ```bash
-# Build y levantar
+# Build and start
 docker compose up -d --build
 
-# Solo agent-pc (para desarrollo rápido)
+# Just agent-pc (for quick dev)
 docker compose up -d agent-pc
 
-# Ver logs
+# View logs
 docker compose logs -f agent-pc
 docker compose logs -f open-webui
 
-# Reconstruir tras cambios
+# Rebuild after changes
 docker compose build agent-pc
 docker compose up -d --force-recreate agent-pc
 
-# Bajar todo
+# Stop everything
 docker compose down
 
-# Con perfiles
+# With profiles
 docker compose --profile ollama --profile tailscale up -d
 
-# Limpiar volúmenes
+# Clean volumes
 docker compose down -v
 ```
 
-## Añadir Nuevas Herramientas
+## Adding New Tools
 
-1. Definir el schema en `server/tools.py` → `TOOL_DEFINITIONS`
-2. Implementar la función `tool_<nombre>()`
-3. Registrar en `TOOL_MAP`
-4. Añadir a `open-webui/tools/agent-pc-tools.json`
-5. Reconstruir: `docker compose build agent-pc && docker compose up -d`
-6. Reimportar tools en Open WebUI Admin Panel
+1. Define schema in `server/tools.py` → `TOOL_DEFINITIONS`
+2. Implement `tool_<name>()` function
+3. Register in `TOOL_MAP`
+4. Add to `open-webui/tools/agent-pc-tools.json`
+5. Rebuild: `docker compose build agent-pc && docker compose up -d`
+6. Re-import tools in Open WebUI Admin Panel
 
-## Convenciones de Código
+## Code Conventions
 
-- **Idioma:** Variables/funciones en inglés, comentarios/docstrings en español
-- **Python:** PEP 8, type hints cuando sea útil
-- **Herramientas:** Cada tool retorna `{"ok": bool, ...}` 
-- **Errores:** `{"ok": false, "error": "mensaje"}`
-- **Streaming:** Ya no se usa en Agent-PC (Open WebUI lo maneja)
+- **Language:** English for code, docstrings, and comments
+- **Python:** PEP 8, type hints where useful
+- **Tools:** Each tool returns `{"ok": bool, ...}`
+- **Errors:** `{"ok": false, "error": "message"}`
+- **Streaming:** No longer used in Agent-PC (Open WebUI handles it)

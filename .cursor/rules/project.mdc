@@ -25,8 +25,7 @@ User Device (PWA) → Tailscale VPN → Open WebUI (port 3000) → Agent-PC (por
 ## Code Conventions
 
 ### Python
-- **Code:** English (variables, functions, classes)
-- **Comments/Docstrings:** Spanish
+- **Language:** English for all code, comments, and docstrings
 - **Style:** PEP 8, 4 spaces, snake_case, PascalCase for classes
 - **Type hints:** Use where they improve clarity
 - **Tool return format:** `{"ok": bool, "error"?: str, ...}`

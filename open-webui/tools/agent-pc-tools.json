@@ -1,23 +1,23 @@
 {
-  "_info": "Agent-PC Tools para Open WebUI — Importa este archivo desde Admin Panel > Functions",
+  "_info": "Agent-PC Tools for Open WebUI — Import from Admin Panel > Workspace > Functions",
   "name": "Agent-PC Tools",
-  "description": "Herramientas para controlar la máquina host desde Open WebUI. Requiere Agent-PC Server corriendo en Docker.",
+  "description": "Tools for controlling the host machine from Open WebUI. Requires Agent-PC Server running in Docker.",
   "endpoint": "http://agent-pc:8765",
   "secret": "${AUTH_SECRET}",
   "tools": [
     {
       "name": "execute_command",
-      "description": "Ejecuta un comando shell en la máquina Linux host. Usa esto para operaciones del sistema como ver espacio en disco, listar procesos, instalar paquetes, etc.",
+      "description": "Execute a shell command on the Linux host machine. Use for system operations like checking disk space, listing processes, installing packages, etc.",
       "parameters": {
         "type": "object",
         "properties": {
           "command": {
             "type": "string",
-            "description": "El comando shell a ejecutar (ej: 'df -h', 'ls -la /home', 'ps aux')"
+            "description": "The shell command to execute (e.g. 'df -h', 'ls -la /home', 'ps aux')"
           },
           "timeout": {
             "type": "integer",
-            "description": "Timeout en segundos (default: 30, max: 120)"
+            "description": "Timeout in seconds (default: 30, max: 120)"
           }
         },
         "required": ["command"]
@@ -25,21 +25,21 @@
     },
     {
       "name": "read_file",
-      "description": "Lee el contenido de un archivo del host. Para archivos grandes, especifica start_line y end_line.",
+      "description": "Read the contents of a file from the host. For large files, specify start_line and end_line.",
       "parameters": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Ruta absoluta del archivo a leer (ej: '/home/usuario/proyecto/main.py')"
+            "description": "Absolute path of the file to read (e.g. '/home/user/project/main.py')"
           },
           "start_line": {
             "type": "integer",
-            "description": "Línea inicial (1-based, opcional)"
+            "description": "Starting line (1-based, optional)"
           },
           "end_line": {
             "type": "integer",
-            "description": "Línea final (1-based, opcional)"
+            "description": "Ending line (1-based, optional)"
           }
         },
         "required": ["path"]
@@ -47,17 +47,17 @@
     },
     {
       "name": "write_file",
-      "description": "Escribe o crea un archivo en el host. Crea directorios padres si no existen.",
+      "description": "Write or create a file on the host. Creates parent directories if they don't exist.",
       "parameters": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Ruta absoluta del archivo a escribir"
+            "description": "Absolute path of the file to write"
           },
           "content": {
             "type": "string",
-            "description": "Contenido a escribir en el archivo"
+            "description": "Content to write to the file"
           }
         },
         "required": ["path", "content"]
@@ -65,17 +65,17 @@
     },
     {
       "name": "list_directory",
-      "description": "Lista el contenido de un directorio en el host.",
+      "description": "List the contents of a directory on the host.",
       "parameters": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Ruta absoluta del directorio a listar"
+            "description": "Absolute path of the directory to list"
           },
           "pattern": {
             "type": "string",
-            "description": "Patrón glob opcional (ej: '*.py', '*.md')"
+            "description": "Optional glob pattern (e.g. '*.py', '*.md')"
           }
         },
         "required": ["path"]
@@ -83,21 +83,21 @@
     },
     {
       "name": "search_files",
-      "description": "Busca archivos que contengan un patrón de texto (usa grep).",
+      "description": "Search for files containing a text pattern (uses grep).",
       "parameters": {
         "type": "object",
         "properties": {
           "pattern": {
             "type": "string",
-            "description": "Patrón regex o texto a buscar"
+            "description": "Regex pattern or text to search for"
           },
           "directory": {
             "type": "string",
-            "description": "Directorio donde buscar (default: workspace root)"
+            "description": "Directory to search in (default: workspace root)"
           },
           "file_pattern": {
             "type": "string",
-            "description": "Filtro de archivos (ej: '*.py', '*.md')"
+            "description": "File filter (e.g. '*.py', '*.md')"
           }
         },
         "required": ["pattern"]

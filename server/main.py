@@ -1,16 +1,15 @@
 # ============================================
-# Agent-PC Server — Tool Execution Engine 🛠️
+# Agent-PC Server — Tool Execution Engine
 # ============================================
 """
-Servidor simplificado que expone herramientas para Open WebUI.
-Open WebUI maneja todo el LLM (chat, streaming, multi-modelo).
-Agent-PC solo ejecuta herramientas en la máquina host.
+Minimal server that exposes tools for Open WebUI.
+Open WebUI handles all LLM logic (chat, streaming, multi-model).
+Agent-PC only executes tools on the host machine.
 
 Endpoints:
   - GET  /health           → health check
-  - GET  /tools            → lista herramientas (OpenAI format)
-  - POST /tool             → ejecutar una herramienta
-  - GET  /openapi.json     → OpenAPI spec para Open WebUI Tools
+  - GET  /tools            → list tools (OpenAI format)
+  - POST /tool             → execute a tool
 """
 import json
 import time
@@ -25,7 +24,7 @@ from tools import TOOL_DEFINITIONS, execute_tool
 
 # ---- Pydantic models ----
 class ToolExecuteRequest(BaseModel):
-    """Request para ejecutar una herramienta."""
+    """Request to execute a tool."""
     name: str
     args: dict = {}
 
@@ -33,18 +32,18 @@ class ToolExecuteRequest(BaseModel):
 # ---- Auth helper ----
 def auth_check(secret: str):
     if secret != config.AUTH_SECRET:
-        raise HTTPException(status_code=403, detail="Secreto inválido.")
+        raise HTTPException(status_code=403, detail="Invalid secret.")
 
 
 # ---- App ----
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(f"🚀 Agent-PC Tool Engine iniciado en {config.SERVER_HOST}:{config.SERVER_PORT}")
+    print(f"Agent-PC Tool Engine started on {config.SERVER_HOST}:{config.SERVER_PORT}")
     print(f"   Workspace : {config.WORKSPACE_ROOT}")
     print(f"   SSH Host  : {config.SSH_HOST}:{config.SSH_PORT}")
-    print(f"   Herramientas: {', '.join(t['function']['name'] for t in TOOL_DEFINITIONS)}")
+    print(f"   Tools: {', '.join(t['function']['name'] for t in TOOL_DEFINITIONS)}")
     yield
-    print("👋 Agent-PC Server detenido.")
+    print("Agent-PC Server stopped.")
 
 
 app = FastAPI(title="Agent-PC Tool Engine", version="2.0.0", lifespan=lifespan)
@@ -53,7 +52,7 @@ app = FastAPI(title="Agent-PC Tool Engine", version="2.0.0", lifespan=lifespan)
 # ---- REST endpoints ----
 @app.get("/health")
 async def health():
-    """Health check para Docker y monitoreo."""
+    """Health check for Docker and monitoring."""
     return {
         "status": "ok",
         "timestamp": time.time(),
@@ -63,18 +62,18 @@ async def health():
 
 @app.get("/tools")
 async def list_tools(secret: str = ""):
-    """Listar herramientas en formato OpenAI function-calling.
-    Open WebUI puede importar estas definiciones."""
+    """List tools in OpenAI function-calling format.
+    Open WebUI can import these definitions."""
     auth_check(secret)
     return {"tools": TOOL_DEFINITIONS}
 
 
 @app.post("/tool")
 async def call_tool(req: ToolExecuteRequest, secret: str = ""):
-    """Ejecutar una herramienta. Open WebUI llama este endpoint
-    cuando el LLM decide usar una función."""
+    """Execute a tool. Open WebUI calls this endpoint
+    when the LLM decides to use a function."""
     auth_check(secret)
-    print(f"🔧 Tool: {req.name}({json.dumps(req.args, ensure_ascii=False)[:100]})")
+    print(f"Tool: {req.name}({json.dumps(req.args, ensure_ascii=False)[:100]})")
     result = execute_tool(req.name, req.args)
     return result
 

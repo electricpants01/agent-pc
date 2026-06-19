@@ -1,27 +1,27 @@
-# Agent-PC — Arquitectura del Sistema
+# Agent-PC — System Architecture
 
-## Visión General
+## Overview
 
-Agent-PC es un sistema que permite controlar una máquina Linux remotamente usando IA conversacional desde cualquier dispositivo (iPhone, iPad, navegador). No requiere instalar apps nativas — usa Open WebUI como PWA.
+Agent-PC is a system for controlling a Linux machine remotely using conversational AI from any device (iPhone, iPad, browser). No native apps required — uses Open WebUI as a PWA.
 
-## Diagrama de Arquitectura
+## Architecture Diagram
 
 ```
 ┌──────────────────────┐      Tailscale VPN      ┌──────────────────────────────────────┐
-│  CUALQUIER DISPOSITIVO│◄──────────────────────►│  Linux Server 24/7 (Docker Host)     │
-│                      │    Red privada mesh     │                                      │
+│  ANY DEVICE          │◄──────────────────────►│  Linux Server 24/7 (Docker Host)     │
+│                      │    Private mesh net    │                                      │
 │ • iPhone (PWA/Safari)│                         │  ┌────────────────────────────────┐  │
-│ • iPad               │                         │  │  🧠 Open WebUI (puerto 3000)   │  │
-│ • Mac/PC (navegador) │                         │  │  • Panel admin multi-modelo    │  │
-│ • 🎤 Voz → comando   │                         │  │  • OpenAI / Gemini / DeepSeek  │  │
+│ • iPad               │                         │  │  Open WebUI (port 3000)        │  │
+│ • Mac/PC (browser)   │                         │  │  • Multi-model admin panel     │  │
+│ • Voice → command    │                         │  │  • OpenAI / Gemini / DeepSeek  │  │
 │                      │                         │  │  • Claude / Ollama / etc.      │  │
-└──────────────────────┘                         │  │  • API OpenAI-compatible        │  │
+└──────────────────────┘                         │  │  • OpenAI-compatible API        │  │
                                                  │  │  • Functions / Tools pipeline   │  │
-                                                 │  │  • Chat + Voz + Streaming      │  │
+                                                 │  │  • Chat + Voice + Streaming    │  │
                                                  │  └──────────────┬─────────────────┘  │
                                                  │                 │ HTTP               │
                                                  │  ┌──────────────▼─────────────────┐  │
-                                                 │  │  🛠️ Agent-PC (puerto 8765)    │  │
+                                                 │  │  Agent-PC (port 8765)          │  │
                                                  │  │  • FastAPI (Python 3.11)       │  │
                                                  │  │  • Tool execution engine       │  │
                                                  │  │  • Endpoints:                  │  │
@@ -32,87 +32,89 @@ Agent-PC es un sistema que permite controlar una máquina Linux remotamente usan
                                                  │  └──────────────┬─────────────────┘  │
                                                  │                 │ SSH                │
                                                  │  ┌──────────────▼─────────────────┐  │
-                                                 │  │  💻 Host Machine               │  │
+                                                 │  │  Host Machine                  │  │
                                                  │  │  • File system (read/write)    │  │
                                                  │  │  • Shell commands              │  │
                                                  │  │  • Directory listing           │  │
                                                  │  │  • File search (grep)          │  │
                                                  │  └────────────────────────────────┘  │
                                                  │                                      │
-                                                 │  Servicios Opcionales:               │
+                                                 │  Optional Services:                  │
                                                  │  ┌────────────────────────────────┐  │
-                                                 │  │  🦙 Ollama (puerto 11434)      │  │
-                                                 │  │  • Modelos LLM locales         │  │
+                                                 │  │  Ollama (port 11434)            │  │
+                                                 │  │  • Local LLM models             │  │
+                                                 │  │  • Full privacy                 │  │
                                                  │  └────────────────────────────────┘  │
                                                  │  ┌────────────────────────────────┐  │
-                                                 │  │  🔐 Tailscale                  │  │
+                                                 │  │  Tailscale                      │  │
                                                  │  │  • VPN mesh (WireGuard)        │  │
+                                                 │  │  • IPs 100.x.x.x               │  │
                                                  │  └────────────────────────────────┘  │
                                                  └──────────────────────────────────────┘
 ```
 
-## Flujo de Datos: Voz del Usuario → Ejecución en Host
+## Data Flow: User Voice → Host Execution
 
 ```
-1. Usuario habla al iPhone
-   └→ Safari Web Speech API captura voz
+1. User speaks to iPhone
+   └→ Safari Web Speech API captures voice
 
-2. Texto enviado a Open WebUI (HTTP POST /api/chat/completions)
-   └→ API OpenAI-compatible con API key de Open WebUI
+2. Text sent to Open WebUI (HTTP POST /api/chat/completions)
+   └→ OpenAI-compatible API with Open WebUI API key
 
-3. Open WebUI procesa con LLM configurado
-   └→ El LLM decide si necesita ejecutar herramientas
+3. Open WebUI processes with configured LLM
+   └→ LLM decides whether to use tools
 
-4. Si necesita herramienta → HTTP POST a Agent-PC (/tool)
-   └→ Auth via AUTH_SECRET compartido
+4. If tool needed → HTTP POST to Agent-PC (/tool)
+   └→ Auth via shared AUTH_SECRET
 
-5. Agent-PC ejecuta localmente (contenedor)
-   └→ O vía SSH al host si está configurado
+5. Agent-PC executes locally (container)
+   └→ Or via SSH to host if configured
 
-6. Resultado vuelve: Agent-PC → Open WebUI → LLM formula respuesta
-   └→ Respuesta en lenguaje natural enviada al cliente
+6. Result flows back: Agent-PC → Open WebUI → LLM formulates response
+   └→ Natural language response sent to client
 
-7. Safari/iPhone muestra texto + opcionalmente lee en voz alta
-   └→ AVSpeechSynthesizer (Web Speech API)
+7. Safari/iPhone displays text + optionally reads aloud
+   └→ Web Speech API
 ```
 
-## Componentes
+## Components
 
 ### Open WebUI
-- **Imagen:** `ghcr.io/open-webui/open-webui:main`
-- **Rol:** Cerebro multi-modelo, interfaz de usuario (PWA), proxy LLM
-- **Puerto:** 3000 → 8080 (interno)
-- **Persistencia:** Volumen Docker `open-webui-data`
-- **Auth:** Cuentas de usuario locales + API keys por proveedor
+- **Image:** `ghcr.io/open-webui/open-webui:main`
+- **Role:** Multi-model brain, user interface (PWA), LLM proxy
+- **Port:** 3000 → 8080 (internal)
+- **Persistence:** Docker volume `open-webui-data`
+- **Auth:** Local user accounts + per-provider API keys
 
 ### Agent-PC Server (Tool Engine)
-- **Imagen:** Dockerfile propio (Python 3.11-slim)
-- **Rol:** Ejecutor de herramientas en el host
-- **Puerto:** 8765
-- **Auth:** `AUTH_SECRET` compartido vía query param
+- **Image:** Custom Dockerfile (Python 3.11-slim)
+- **Role:** Executes tools on the host
+- **Port:** 8765
+- **Auth:** `AUTH_SECRET` shared via query param
 
-### Herramientas Disponibles
+### Available Tools
 
-| Herramienta | Descripción | Parámetros |
-|-------------|-------------|------------|
-| `execute_command` | Ejecutar comando shell | `command: str`, `timeout: int?` |
-| `read_file` | Leer archivo | `path: str`, `start_line: int?`, `end_line: int?` |
-| `write_file` | Escribir archivo | `path: str`, `content: str` |
-| `list_directory` | Listar directorio | `path: str`, `pattern: str?` |
-| `search_files` | Buscar en archivos | `pattern: str`, `directory: str?`, `file_pattern: str?` |
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `execute_command` | Execute shell command | `command: str`, `timeout: int?` |
+| `read_file` | Read file | `path: str`, `start_line: int?`, `end_line: int?` |
+| `write_file` | Write file | `path: str`, `content: str` |
+| `list_directory` | List directory | `path: str`, `pattern: str?` |
+| `search_files` | Search in files | `pattern: str`, `directory: str?`, `file_pattern: str?` |
 
-## Red
+## Network
 
-- **Red interna Docker:** `agent-pc-network` (bridge)
-- **Comunicación:** Los servicios se alcanzan por nombre de servicio
-- **Tailscale:** IPs 100.x.x.x para acceso externo
-- **Host gateway:** `host.docker.internal` para SSH desde contenedor al host
+- **Internal Docker network:** `agent-pc-network` (bridge)
+- **Communication:** Services reachable by service name
+- **Tailscale:** IPs 100.x.x.x for external access
+- **Host gateway:** `host.docker.internal` for SSH from container to host
 
-## Seguridad
+## Security
 
-1. **Tailscale VPN:** WireGuard — tráfico encriptado punto a punto
-2. **Red Docker aislada:** `agent-pc-network` solo accesible entre servicios
-3. **AUTH_SECRET:** Clave compartida Open WebUI ↔ Agent-PC
-4. **SSH con clave:** Contenedor Agent-PC accede al host solo con clave autorizada
-5. **Sin puertos a internet:** Solo expuesto dentro de tailnet
-6. **Workspace restringido:** `WORKSPACE_ROOT` limita el scope de operaciones
+1. **Tailscale VPN:** WireGuard — point-to-point encrypted traffic
+2. **Isolated Docker network:** `agent-pc-network` only accessible between services
+3. **AUTH_SECRET:** Shared key Open WebUI ↔ Agent-PC
+4. **SSH with key:** Agent-PC container accesses host only with authorized key
+5. **No internet-exposed ports:** Only accessible within tailnet
+6. **Restricted workspace:** `WORKSPACE_ROOT` limits operation scope

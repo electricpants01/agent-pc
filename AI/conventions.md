@@ -1,65 +1,65 @@
-# Agent-PC — Convenciones del Proyecto
+# Agent-PC — Project Conventions
 
-## Idiomas
+## Language
 
-- **Código:** Inglés (variables, funciones, clases)
-- **Comentarios y docstrings:** Español
-- **Documentación:** Español
-- **Commits:** Inglés (conventional commits)
+- **Code:** English (variables, functions, classes)
+- **Comments and docstrings:** English
+- **Documentation:** English
+- **Commits:** English (conventional commits)
 
 ## Python
 
-### Estilo
-- PEP 8 (4 espacios, snake_case, PascalCase para clases)
-- Type hints donde aporten claridad
-- Docstrings en formato Google-style
+### Style
+- PEP 8 (4 spaces, snake_case, PascalCase for classes)
+- Type hints where they add clarity
+- Google-style docstrings
 
-### Herramientas (Tools)
-- Cada tool retorna un dict con `{"ok": bool, ...}`
-- Errores: `{"ok": false, "error": "descripción"}`
-- Funciones síncronas (FastAPI las ejecuta en thread pool)
+### Tools
+- Each tool returns dict with `{"ok": bool, ...}`
+- Errors: `{"ok": false, "error": "description"}`
+- Synchronous functions (FastAPI runs them in thread pool)
 
-### Configuración
-- Variables de entorno vía `python-dotenv`
-- Archivo `.env` NO se commitea (está en `.gitignore`)
-- `.env.example` y `.env.docker` como templates
+### Configuration
+- Environment variables via `python-dotenv`
+- `.env` file is NOT committed (in `.gitignore`)
+- `.env.example` and `.env.docker` as templates
 
 ## Docker
 
-- Imágenes basadas en `python:3.11-slim-bookworm`
-- Usuario no-root (`agentpc`) en contenedores
-- Health checks en todos los servicios
-- Volúmenes con nombres explícitos (`agent-pc-*`)
-- Red bridge dedicada (`agent-pc-network`)
+- Images based on `python:3.11-slim-bookworm`
+- Non-root user (`agentpc`) in containers
+- Health checks on all services
+- Volumes with explicit names (`agent-pc-*`)
+- Dedicated bridge network (`agent-pc-network`)
 
 ## Open WebUI
 
-- Tools en `open-webui/tools/` en formato JSON
-- Configuración de API keys desde el panel admin (nunca en archivos)
-- Funciones usan HTTP POST a `http://agent-pc:8765/tool`
+- Tools in `open-webui/tools/` in JSON format
+- API keys configured from admin panel (never in files)
+- Functions use HTTP POST to `http://agent-pc:8765/tool`
 
 ## Git
 
-### Ramas
-- `main` — producción
-- `dev` — desarrollo
-- `feat/<nombre>` — features nuevas
+### Branches
+- `main` — production
+- `dev` — development
+- `feat/<name>` — new features
 
 ### Commits (Conventional Commits)
 ```
-feat: añadir tool para gestionar procesos
-fix: corregir timeout en execute_command
-docs: actualizar README con nueva arquitectura
-refactor: simplificar main.py
-chore: actualizar dependencias
+feat: add tool for process management
+fix: fix timeout in execute_command
+docs: update README with new architecture
+refactor: simplify main.py
+chore: update dependencies
 ```
 
-## Nombrado de Archivos
+## File Naming
 
-- `docker-compose.yml` — orquestación
-- `.env.docker` — template de variables Docker
-- `Dockerfile` — imagen de contenedor
-- `entrypoint.sh` — script de entrada
-- `tools.py` — definición de herramientas
-- `config.py` — configuración
-- `main.py` — punto de entrada FastAPI
+- `docker-compose.yml` — orchestration
+- `.env.docker` — Docker env template
+- `Dockerfile` — container image
+- `entrypoint.sh` — startup script
+- `tools.py` — tool definitions
+- `config.py` — configuration
+- `main.py` — FastAPI entry point

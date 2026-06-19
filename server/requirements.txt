@@ -10,7 +10,7 @@ pydantic==2.10.4
 python-dotenv==1.0.1
 httpx==0.28.1
 
-# SSH para ejecución de comandos en el host
+# SSH for executing commands on the host
 asyncssh==2.19.0
 
 # Opcional: MCP (Model Context Protocol)

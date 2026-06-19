@@ -1,36 +1,36 @@
-# Agent-PC — Documentación para Agentes AI
+# Agent-PC — AI Agent Documentation
 
-Esta carpeta contiene documentación estructurada para que agentes de IA (Cline, Cursor, Copilot, etc.) comprendan rápidamente el proyecto.
+Structured documentation for AI agents (Cline, Cursor, Copilot, etc.) to quickly understand the project.
 
-## Índice
+## Index
 
-| Archivo | Contenido |
-|---------|-----------|
-| [`architecture.md`](architecture.md) | Arquitectura completa del sistema, diagramas, flujo de datos, componentes, seguridad |
-| [`development.md`](development.md) | Guía de desarrollo: estructura del proyecto, stack, comandos, cómo añadir tools |
-| [`deployment.md`](deployment.md) | Guía de despliegue: requisitos, instalación paso a paso, backup, troubleshooting |
-| [`conventions.md`](conventions.md) | Convenciones: idiomas, estilo de código, git, Docker, nombrado de archivos |
+| File | Content |
+|------|---------|
+| [`architecture.md`](architecture.md) | Complete system architecture, diagrams, data flow, components, security |
+| [`development.md`](development.md) | Development guide: project structure, stack, commands, how to add tools |
+| [`deployment.md`](deployment.md) | Deployment guide: requirements, step-by-step setup, backup, troubleshooting |
+| [`conventions.md`](conventions.md) | Conventions: languages, code style, Docker, git, file naming |
 
-## Reglas para Agentes
+## Agent Rules
 
-| Carpeta | Audiencia |
-|---------|-----------|
+| Folder | Audience |
+|--------|----------|
 | [`.clinerules/`](../.clinerules/) | Cline (VS Code extension) |
 | [`.cursor/rules/`](../.cursor/rules/) | Cursor IDE |
 
-## Lectura Recomendada para un Nuevo Agente
+## Recommended Reading Order for a New Agent
 
-1. **`architecture.md`** — Entender qué hace el sistema y cómo
-2. **`development.md`** — Saber dónde está cada cosa
-3. **`conventions.md`** — Seguir las reglas del proyecto
-4. **`deployment.md`** — Ponerlo en marcha
+1. **`architecture.md`** — Understand what the system does and how
+2. **`development.md`** — Know where everything lives
+3. **`conventions.md`** — Follow the project rules
+4. **`deployment.md`** — Get it running
 
-## Resumen Rápido (TL;DR)
+## TL;DR
 
-- **Agent-PC** = controla Linux remotamente con IA conversacional
-- **Open WebUI** (Docker, puerto 3000) = cerebro multi-modelo + interfaz PWA
-- **Agent-PC Server** (Docker, puerto 8765) = ejecutor de herramientas (NO LLM)
-- **Tailscale** = VPN para acceso desde iPhone
+- **Agent-PC** = control Linux remotely via conversational AI
+- **Open WebUI** (Docker, port 3000) = multi-model brain + PWA interface
+- **Agent-PC Server** (Docker, port 8765) = tool executor (NO LLM)
+- **Tailscale** = VPN for iPhone access
 - **Tools** = execute_command, read_file, write_file, list_directory, search_files
-- **Auth** = AUTH_SECRET compartido entre Open WebUI y Agent-PC
-- **Código** = Python 3.11 + FastAPI, inglés para variables, español para comentarios
+- **Auth** = AUTH_SECRET shared between Open WebUI and Agent-PC
+- **Code** = Python 3.11 + FastAPI, English for code, English for comments

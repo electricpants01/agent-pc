@@ -1,25 +1,25 @@
-# Agent-PC — Guía de Despliegue
+# Agent-PC — Deployment Guide
 
-## Requisitos del Servidor
+## Server Requirements
 
-- **Linux** (Ubuntu 22.04+ / Debian 12+ recomendado)
-- **Docker** 24+ y **Docker Compose** v2+
-- **OpenSSH Server** (para tool execution en el host)
-- **Tailscale** (para acceso remoto desde iPhone)
-- Mínimo 4 GB RAM (8 GB si usas Ollama)
-- 20 GB disco (más si descargas modelos locales)
+- **Linux** (Ubuntu 22.04+ / Debian 12+ recommended)
+- **Docker** 24+ and **Docker Compose** v2+
+- **OpenSSH Server** (for tool execution on host)
+- **Tailscale** (for remote iPhone access)
+- Minimum 4 GB RAM (8 GB if using Ollama)
+- 20 GB disk (more if downloading local models)
 
-## Instalación Paso a Paso
+## Step-by-Step Setup
 
-### 1. Instalar Docker
+### 1. Install Docker
 
 ```bash
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
-# Cerrar sesión y volver a entrar
+# Log out and back in
 ```
 
-### 2. Clonar y Configurar
+### 2. Clone and Configure
 
 ```bash
 git clone <repo-url> agent-pc
@@ -28,15 +28,15 @@ cp .env.docker .env
 nano .env
 ```
 
-Variables críticas en `.env`:
+Critical `.env` variables:
 ```ini
-WEBUI_SECRET_KEY=<clave-aleatoria-larga>
-AUTH_SECRET=<clave-compartida>
-SSH_USER=<tu-usuario>
-WORKSPACE_ROOT=/home/<tu-usuario>
+WEBUI_SECRET_KEY=<long-random-string>
+AUTH_SECRET=<shared-secret>
+SSH_USER=<your-username>
+WORKSPACE_ROOT=/home/<your-username>
 ```
 
-### 3. Configurar SSH
+### 3. Configure SSH
 
 ```bash
 sudo apt install -y openssh-server
@@ -45,49 +45,49 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-### 4. Levantar Servicios
+### 4. Start Services
 
 ```bash
-# Solo lo esencial
+# Essentials only
 docker compose up -d
 
-# Con Ollama (necesita más RAM)
+# With Ollama (needs more RAM)
 docker compose --profile ollama up -d
 
-# Con Tailscale VPN
+# With Tailscale VPN
 docker compose --profile tailscale up -d
 
-# Verificar
+# Verify
 docker compose ps
 docker compose logs agent-pc
 ```
 
-### 5. Configurar Open WebUI
+### 5. Configure Open WebUI
 
-1. Abrir `http://<ip-servidor>:3000`
-2. Crear cuenta admin
+1. Open `http://<server-ip>:3000`
+2. Create admin account
 3. **Admin Panel → Settings → Connections:**
-   - Añadir OpenAI: `https://api.openai.com/v1` + API key
-   - Añadir Gemini: API key de Google AI Studio
-   - Añadir DeepSeek: `https://api.deepseek.com/v1` + API key
-   - Si usas Ollama: `http://ollama:11434`
+   - Add OpenAI: `https://api.openai.com/v1` + API key
+   - Add Gemini: Google AI Studio API key
+   - Add DeepSeek: `https://api.deepseek.com/v1` + API key
+   - If using Ollama: `http://ollama:11434`
 4. **Admin Panel → Workspace → Functions:**
-   - Importar `open-webui/tools/agent-pc-tools.json`
-   - Configurar variable `AUTH_SECRET`
+   - Import `open-webui/tools/agent-pc-tools.json`
+   - Set `AUTH_SECRET` variable
 
-### 6. Configurar Tailscale (Acceso Remoto)
+### 6. Configure Tailscale (Remote Access)
 
 ```bash
-# En el servidor
+# On server
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 
-# En iPhone: instalar Tailscale desde App Store
-# Conectar con la misma cuenta
-# Acceder vía http://100.x.x.x:3000
+# On iPhone: install Tailscale from App Store
+# Connect with same account
+# Access via http://100.x.x.x:3000
 ```
 
-## Actualización
+## Updating
 
 ```bash
 git pull
@@ -96,43 +96,43 @@ docker compose build agent-pc
 docker compose up -d
 ```
 
-## Backup y Restauración
+## Backup and Restore
 
 ```bash
-# Backup de datos de Open WebUI
+# Backup Open WebUI data
 docker run --rm -v agent-pc-webui-data:/data -v $(pwd):/backup alpine tar czf /backup/webui-backup.tar.gz -C /data .
 
-# Restaurar
+# Restore
 docker run --rm -v agent-pc-webui-data:/data -v $(pwd):/backup alpine tar xzf /backup/webui-backup.tar.gz -C /data
 ```
 
 ## Troubleshooting
 
-### Agent-PC no arranca
+### Agent-PC won't start
 ```bash
 docker compose logs agent-pc
-# Verificar que requirements.txt no tenga dependencias rotas
+# Check that requirements.txt has no broken deps
 ```
 
-### SSH no funciona
+### SSH not working
 ```bash
-# Probar SSH manualmente desde el host
+# Test SSH manually from host
 ssh -i ~/.ssh/id_rsa $USER@localhost "echo ok"
-# Verificar permisos
+# Check permissions
 chmod 600 ~/.ssh/id_rsa ~/.ssh/authorized_keys
 ```
 
-### Open WebUI no ve a Agent-PC
+### Open WebUI can't reach Agent-PC
 ```bash
-# Verificar que ambos están en la misma red
+# Verify both on same network
 docker compose exec open-webui curl http://agent-pc:8765/health
-# Debe responder {"status":"ok",...}
+# Should return {"status":"ok",...}
 ```
 
-### Tailscale no conecta
+### Tailscale not connecting
 ```bash
-# Verificar estado
+# Check status
 tailscale status
-# Re-autenticar
+# Re-authenticate
 sudo tailscale up
 ```
