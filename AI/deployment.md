@@ -5,7 +5,7 @@
 - **Linux** (Ubuntu 22.04+ / Debian 12+ recommended)
 - **Docker** 24+ and **Docker Compose** v2+
 - **OpenSSH Server** (for tool execution on host)
-- **Tailscale** (for remote iPhone access)
+- **Tailscale** installed on host (`tailscale serve`) for remote iPhone access
 - Minimum 4 GB RAM (8 GB if using Ollama)
 - 20 GB disk (more if downloading local models)
 
@@ -54,9 +54,6 @@ docker compose up -d
 # With Ollama (needs more RAM)
 docker compose --profile ollama up -d
 
-# With Tailscale VPN
-docker compose --profile tailscale up -d
-
 # Verify
 docker compose ps
 docker compose logs agent-pc
@@ -78,14 +75,21 @@ docker compose logs agent-pc
 
 ### 6. Configure Tailscale (Remote Access)
 
+Tailscale runs **natively on the host** (not in Docker). The `tailscale serve` command
+exposes Open WebUI over your tailnet with automatic HTTPS.
+
 ```bash
-# On server
+# 1. Install Tailscale on the host
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 
+# 2. Expose Open WebUI via Tailscale Serve (HTTPS)
+sudo tailscale set --operator=$USER          # one-time, allows non-root serve
+tailscale serve --bg http://127.0.0.1:3000
+
 # On iPhone: install Tailscale from App Store
 # Connect with same account
-# Access via http://100.x.x.x:3000
+# Access via https://<your-tailnet-name>.ts.net
 ```
 
 ## Updating
@@ -130,10 +134,12 @@ docker compose exec open-webui curl http://agent-pc:8765/health
 # Should return {"status":"ok",...}
 ```
 
-### Tailscale not connecting
+### Tailscale Serve not working
 ```bash
-# Check status
-tailscale status
+# Check serve status
+tailscale serve status
 # Re-authenticate
 sudo tailscale up
+# Re-apply serve config
+tailscale serve --bg http://127.0.0.1:3000
 ```

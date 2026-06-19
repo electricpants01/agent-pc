@@ -30,7 +30,7 @@ Structured documentation for AI agents (Cline, Cursor, Copilot, etc.) to quickly
 - **Agent-PC** = control Linux remotely via conversational AI
 - **Open WebUI** (Docker, port 3000) = multi-model brain + PWA interface
 - **Agent-PC Server** (Docker, port 8765) = tool executor (NO LLM)
-- **Tailscale** = VPN for iPhone access
+- **Tailscale Serve** (host-native) = HTTPS VPN for iPhone access via `tailscale serve`
 - **Tools** = execute_command, read_file, write_file, list_directory, search_files
 - **Tool files** = `open-webui/tools/agent-pc-tools.json` (JSON import) + `agent-pc-tools.py` (Python function import)
 - **Auth** = AUTH_SECRET shared between Open WebUI and Agent-PC

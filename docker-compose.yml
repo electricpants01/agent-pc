@@ -5,7 +5,7 @@
 #   - open-webui  : Multi-model brain (OpenAI, Gemini, DeepSeek, Ollama)
 #   - agent-pc    : Tool execution engine (SSH → host)
 #   - ollama      : Local LLM models (optional)
-#   - tailscale   : VPN mesh para acceso remoto seguro
+#   - Tailscale (host-native, via `tailscale serve`)
 # ============================================
 
 version: "3.9"
@@ -105,29 +105,6 @@ services:
     networks:
       - agent-pc-net
 
-  # ============================================
-  # 4. Tailscale — VPN Mesh (Optional) 🔐
-  # ============================================
-  tailscale:
-    image: tailscale/tailscale:latest
-    container_name: agent-pc-tailscale
-    restart: unless-stopped
-    profiles:
-      - tailscale  # Solo se inicia con: docker compose --profile tailscale up
-    network_mode: host
-    volumes:
-      - tailscale-data:/var/lib/tailscale
-      - /dev/net/tun:/dev/net/tun
-    environment:
-      TS_AUTHKEY: "${TS_AUTHKEY:-}"
-      TS_HOSTNAME: "${TS_HOSTNAME:-agent-pc}"
-      TS_STATE_DIR: "/var/lib/tailscale"
-      TS_USERSPACE: "false"
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    privileged: true
-
 # ============================================
 # Persistent volumes
 # ============================================
@@ -136,8 +113,6 @@ volumes:
     name: agent-pc-webui-data
   ollama-data:
     name: agent-pc-ollama-data
-  tailscale-data:
-    name: agent-pc-tailscale-data
 
 # ============================================
 # Internal network for inter-service communication

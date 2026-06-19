@@ -7,7 +7,7 @@ Agent-PC is a system for controlling a Linux machine remotely using conversation
 ## Architecture Diagram
 
 ```
-┌──────────────────────┐      Tailscale VPN      ┌──────────────────────────────────────┐
+┌──────────────────────┐   Tailscale Serve (host) ┌──────────────────────────────────────┐
 │  ANY DEVICE          │◄──────────────────────►│  Linux Server 24/7 (Docker Host)     │
 │                      │    Private mesh net    │                                      │
 │ • iPhone (PWA/Safari)│                         │  ┌────────────────────────────────┐  │
@@ -46,9 +46,9 @@ Agent-PC is a system for controlling a Linux machine remotely using conversation
                                                  │  │  • Full privacy                 │  │
                                                  │  └────────────────────────────────┘  │
                                                  │  ┌────────────────────────────────┐  │
-                                                 │  │  Tailscale                      │  │
-                                                 │  │  • VPN mesh (WireGuard)        │  │
-                                                 │  │  • IPs 100.x.x.x               │  │
+                                                 │  │  Tailscale (host-native)        │  │
+                                                 │  │  • tailscale serve HTTPS        │  │
+                                                 │  │  • Magic DNS (*.ts.net)         │  │
                                                  │  └────────────────────────────────┘  │
                                                  └──────────────────────────────────────┘
 ```
@@ -109,12 +109,12 @@ Agent-PC is a system for controlling a Linux machine remotely using conversation
 
 - **Internal Docker network:** `agent-pc-network` (bridge)
 - **Communication:** Services reachable by service name
-- **Tailscale:** IPs 100.x.x.x for external access
+- **Tailscale Serve:** host-native, HTTPS via Tailscale magic DNS (*.ts.net)
 - **Host gateway:** `host.docker.internal` for SSH from container to host
 
 ## Security
 
-1. **Tailscale VPN:** WireGuard — point-to-point encrypted traffic
+1. **Tailscale Serve:** HTTPS via WireGuard — `tailscale serve` exposes Open WebUI on tailnet
 2. **Isolated Docker network:** `agent-pc-network` only accessible between services
 3. **AUTH_SECRET:** Shared key Open WebUI ↔ Agent-PC
 4. **SSH with key:** Agent-PC container accesses host only with authorized key

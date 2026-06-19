@@ -3,7 +3,7 @@
 Control your Linux machine with AI from any device — install nothing on the client.
 
 ```
-┌──────────────────────┐      Tailscale VPN      ┌──────────────────────────────────────┐
+┌──────────────────────┐   Tailscale Serve (host) ┌──────────────────────────────────────┐
 │  ANY DEVICE          │◄──────────────────────►│  Linux Server 24/7 (Docker)          │
 │                      │    Private mesh net    │                                      │
 │ • iPhone (PWA/Safari)│                         │  ┌────────────────────────────────┐  │
@@ -35,7 +35,7 @@ Control your Linux machine with AI from any device — install nothing on the cl
                                                  │  └────────────────────────────────┘  │
                                                  │                                      │
                                                  │  ┌────────────────────────────────┐  │
-                                                 │  │  🔐 Tailscale                  │  │
+                                                 │  │  🔐 Tailscale (host-native)     │  │
                                                  │  │  • Private mesh VPN            │  │
                                                  │  └────────────────────────────────┘  │
                                                  └──────────────────────────────────────┘
@@ -48,7 +48,7 @@ Control your Linux machine with AI from any device — install nothing on the cl
 ### Requirements
 
 - **Linux** with Docker and Docker Compose installed
-- **Tailscale** installed on host and iPhone (for remote access)
+- **Tailscale** installed on host (`tailscale serve`) and iPhone (for remote access)
 - API key for at least one LLM provider (OpenAI, Gemini, DeepSeek...)
 
 ### 1. Clone and Configure
@@ -83,11 +83,6 @@ docker compose up -d
 # With Ollama (local models)
 docker compose --profile ollama up -d
 
-# With Tailscale (VPN)
-docker compose --profile tailscale up -d
-
-# All together
-docker compose --profile ollama --profile tailscale up -d
 ```
 
 ### 4. Open WebUI
@@ -111,10 +106,17 @@ http://localhost:3000
 
 ### 6. Configure Tailscale (iPhone access)
 
+Tailscale runs **natively on the host** (not in Docker). The `tailscale serve` command
+exposes Open WebUI over your tailnet with automatic HTTPS.
+
 ```bash
-# On the Linux host
+# 1. Install Tailscale on the host
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
+
+# 2. Expose Open WebUI via Tailscale Serve (HTTPS)
+sudo tailscale set --operator=$USER          # one-time, allows non-root serve
+tailscale serve --bg http://127.0.0.1:3000
 
 # On your iPhone: install Tailscale from App Store
 # Log in with the same account
@@ -122,7 +124,7 @@ sudo tailscale up
 
 Now access from Safari on your iPhone:
 ```
-http://100.x.x.x:3000  (your server's Tailscale IP)
+https://<your-tailnet-name>.ts.net  (your server's Tailscale magic DNS name)
 ```
 
 **Tip:** In Safari on iPhone, press Share → "Add to Home Screen" to install it as an app.
@@ -172,7 +174,7 @@ curl -X POST "http://localhost:8765/tool?secret=agent-pc-local-secret-change-me"
 
 1. Install **Tailscale** on your iPhone from the App Store
 2. Connect to your tailnet (same account as the server)
-3. Open Safari and go to `http://<your-server-tailscale-ip>:3000`
+3. Open Safari and go to `https://<your-tailnet-name>.ts.net`
 4. Tap **Share → Add to Home Screen**
 5. Done! Agent-PC appears as an app on your home screen
 
@@ -201,7 +203,9 @@ docker-compose.yml
 ├── agent-pc (port 8765)      ← Tool execution engine
 │   └── SSH → Host machine
 ├── ollama (port 11434)       ← Local models [optional]
-└── tailscale                 ← VPN mesh [optional]
+
+Tailscale runs natively on the host (not in Docker):
+  tailscale serve --bg http://127.0.0.1:3000
 ```
 
 ### Why Docker?
@@ -223,7 +227,7 @@ docker-compose.yml
 
 ## 🛡️ Security
 
-- **Tailscale VPN**: all traffic is encrypted via WireGuard
+- **Tailscale Serve**: HTTPS via WireGuard — `tailscale serve` exposes Open WebUI on your tailnet
 - **Isolated Docker network**: `agent-pc-network` only accessible between services
 - **AUTH_SECRET**: authentication between Open WebUI and Agent-PC
 - **SSH with key**: container accesses host only via authorized SSH
@@ -236,7 +240,7 @@ docker-compose.yml
 
 - [x] Docker Compose with Open WebUI + Agent-PC + Ollama
 - [x] Tool execution via SSH to host
-- [x] Tailscale VPN for remote access
+- [x] Tailscale Serve for remote access (host-native, HTTPS)
 - [x] PWA for iPhone (zero code)
 - [ ] MCP (Model Context Protocol) for Agent-PC
 - [ ] Persistent history with backups

@@ -44,7 +44,7 @@ agent-pc/
 | Tool Engine | Python + FastAPI | 3.11, 0.115.6 |
 | SSH | asyncssh | 2.19.0 |
 | HTTP client | httpx | 0.28.1 |
-| VPN | Tailscale (WireGuard) | latest |
+| VPN | Tailscale Serve (host-native, WireGuard) | latest |
 | Local models | Ollama | latest |
 | Client | PWA (Web Speech API) | Modern browser |
 
@@ -91,8 +91,8 @@ docker compose up -d --force-recreate agent-pc
 # Stop everything
 docker compose down
 
-# With profiles
-docker compose --profile ollama --profile tailscale up -d
+# With Ollama profile
+docker compose --profile ollama up -d
 
 # Clean volumes
 docker compose down -v
