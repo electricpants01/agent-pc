@@ -1,0 +1,15 @@
+[Unit]
+Description=Agent-PC AI Server
+After=network.target
+
+[Service]
+Type=simple
+User=tu-usuario
+WorkingDirectory=/home/tu-usuario/agent-pc/server
+ExecStart=/home/tu-usuario/agent-pc/server/venv/bin/python main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

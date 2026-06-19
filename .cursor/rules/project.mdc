@@ -1,0 +1,82 @@
+---
+description: Agent-PC project rules and conventions
+globs: **/*.py,**/*.yml,**/*.yaml,**/*.md,**/*.sh,**/*.json,**/Dockerfile
+version: 1.0.0
+alwaysApply: true
+---
+
+# Agent-PC — Cursor Rules
+
+## Project Identity
+
+Agent-PC is an AI-powered remote Linux control system. Users control their Linux machine from any device (iPhone PWA, browser) via natural language. The system uses Open WebUI as the multi-model LLM brain and a Python FastAPI server as the tool execution engine, all orchestrated with Docker Compose behind a Tailscale VPN.
+
+## Architecture (CRITICAL)
+
+```
+User Device (PWA) → Tailscale VPN → Open WebUI (port 3000) → Agent-PC (port 8765) → SSH → Host Machine
+```
+
+1. **Agent-PC server is a TOOL EXECUTION ENGINE ONLY** — no LLM, no chat, no WebSocket
+2. **Open WebUI handles ALL LLM logic** — multi-model, streaming, tool calling, admin panel
+3. Communication between services is HTTP (REST)
+4. Auth between Open WebUI and Agent-PC uses `AUTH_SECRET` query parameter
+
+## Code Conventions
+
+### Python
+- **Code:** English (variables, functions, classes)
+- **Comments/Docstrings:** Spanish
+- **Style:** PEP 8, 4 spaces, snake_case, PascalCase for classes
+- **Type hints:** Use where they improve clarity
+- **Tool return format:** `{"ok": bool, "error"?: str, ...}`
+
+### Files You'll Edit Most
+- `server/main.py` — FastAPI app (3 endpoints only: GET /health, GET /tools, POST /tool)
+- `server/tools.py` — Tool definitions (TOOL_DEFINITIONS + TOOL_MAP + implementations)
+- `server/config.py` — Environment configuration (SSH_HOST, AUTH_SECRET, etc.)
+- `docker-compose.yml` — Service orchestration
+- `docker/agent-pc/Dockerfile` — Container image definition
+
+### What NOT to Do
+- ❌ Do NOT add chat/streaming/WebSocket endpoints to Agent-PC server
+- ❌ Do NOT add LLM client libraries (openai, anthropic, etc.) to server
+- ❌ Do NOT hardcode API keys — use env vars or Open WebUI admin panel
+- ❌ Do NOT bypass the tool format — always return `{"ok": bool, ...}`
+- ❌ Do NOT modify `ios/` Swift code (legacy, not maintained)
+- ❌ Do NOT use `server/agent.py` (legacy LLM client, no longer imported)
+
+## Adding a New Tool
+
+1. Add definition to `TOOL_DEFINITIONS` in `server/tools.py`
+2. Implement `tool_<name>()` function
+3. Register in `TOOL_MAP` dict
+4. Add to `open-webui/tools/agent-pc-tools.json`
+5. Rebuild Docker: `docker compose build agent-pc && docker compose up -d`
+
+## Environment Variables
+
+Key env vars (set in `.env` for Docker Compose):
+- `AUTH_SECRET` — Shared secret between Open WebUI and Agent-PC
+- `SSH_HOST` — Host for SSH (default: `host.docker.internal`)
+- `SSH_USER` — SSH username
+- `WORKSPACE_ROOT` — Root directory agent can access
+- `OPENWEBUI_PORT` — External port for Open WebUI (default: 3000)
+- `AGENTPC_PORT` — External port for Agent-PC (default: 8765)
+
+## Commands
+
+```bash
+# Dev (no Docker)
+cd server && pip install -r requirements.txt && python main.py
+
+# Docker
+docker compose up -d                    # Base services
+docker compose --profile ollama up -d   # With local LLMs
+docker compose logs -f agent-pc         # Agent-PC logs
+docker compose build agent-pc && docker compose up -d  # Rebuild
+
+# Test
+curl http://localhost:8765/health
+curl "http://localhost:8765/tools?secret=agent-pc-local-secret-change-me"
+```

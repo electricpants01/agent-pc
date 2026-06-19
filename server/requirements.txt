@@ -1,0 +1,18 @@
+# ============================================
+# Agent-PC Server — Dependencias
+# ============================================
+# Solo tool execution engine — sin cliente LLM
+# ============================================
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-dotenv==1.0.1
+httpx==0.28.1
+
+# SSH para ejecución de comandos en el host
+asyncssh==2.19.0
+
+# Opcional: MCP (Model Context Protocol)
+# mcp==1.x.x
+

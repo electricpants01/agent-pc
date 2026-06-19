@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Agent-PC usa reconocimiento de voz para enviar comandos a tu máquina Linux.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Agent-PC necesita acceso al micrófono para reconocer tus comandos de voz.</string>
+    <key>CFBundleName</key>
+    <string>Agent-PC</string>
+    <key>CFBundleDisplayName</key>
+    <string>Agent-PC</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>UILaunchScreen</key>
+    <dict/>
+</dict>
+</plist>

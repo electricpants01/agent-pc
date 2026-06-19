@@ -1,0 +1,148 @@
+# ============================================
+# Agent-PC — Docker Compose Stack
+# ============================================
+# Servicios:
+#   - open-webui  : Cerebro multi-modelo (OpenAI, Gemini, DeepSeek, Ollama)
+#   - agent-pc    : Tool execution engine (SSH → host)
+#   - ollama      : Modelos LLM locales (opcional)
+#   - tailscale   : VPN mesh para acceso remoto seguro
+# ============================================
+
+version: "3.9"
+
+services:
+  # ============================================
+  # 1. Open WebUI — Cerebro Multi-Modelo 🧠
+  # ============================================
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: agent-pc-webui
+    restart: unless-stopped
+    ports:
+      - "${OPENWEBUI_PORT:-3000}:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+      # Opcional: montar tools personalizadas de Agent-PC
+      - ./open-webui/tools:/app/backend/data/tools:ro
+    environment:
+      # Si usas Ollama local, descomenta:
+      # OLLAMA_BASE_URL: http://ollama:11434
+      # Variables personalizadas (claves API se gestionan desde el panel web)
+      WEBUI_NAME: "Agent-PC"
+      WEBUI_SECRET_KEY: "${WEBUI_SECRET_KEY:-change-me-to-a-random-string}"
+      # Habilitar WebSocket para streaming
+      ENABLE_WEBSOCKET: "true"
+    depends_on:
+      agent-pc:
+        condition: service_healthy
+    networks:
+      - agent-pc-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============================================
+  # 2. Agent-PC Server — Tool Execution Engine 🛠️
+  # ============================================
+  agent-pc:
+    build:
+      context: .
+      dockerfile: docker/agent-pc/Dockerfile
+    container_name: agent-pc-server
+    restart: unless-stopped
+    ports:
+      - "${AGENTPC_PORT:-8765}:8765"
+    volumes:
+      # Montar ~/.ssh para acceder al host vía SSH
+      - ${HOME}/.ssh:/home/agentpc/.ssh:ro
+      # Opcional: montar workspace del host
+      - ${WORKSPACE_ROOT:-${HOME}}:${WORKSPACE_ROOT:-/home/agentpc/workspace}:rw
+    environment:
+      # Server
+      SERVER_HOST: "0.0.0.0"
+      SERVER_PORT: "8765"
+      AUTH_SECRET: "${AUTH_SECRET:-agent-pc-local-secret-change-me}"
+      # Workspace
+      WORKSPACE_ROOT: "${WORKSPACE_ROOT:-/home/agentpc/workspace}"
+      # SSH para acceder al host
+      SSH_HOST: "${SSH_HOST:-host.docker.internal}"
+      SSH_PORT: "${SSH_PORT:-22}"
+      SSH_USER: "${SSH_USER:-${USER}}"
+      SSH_KEY_PATH: "${SSH_KEY_PATH:-/home/agentpc/.ssh/id_rsa}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - agent-pc-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============================================
+  # 3. Ollama — Modelos Locales (Opcional) 🦙
+  # ============================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agent-pc-ollama
+    restart: unless-stopped
+    profiles:
+      - ollama  # Solo se inicia con: docker compose --profile ollama up
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_HOST: "0.0.0.0"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]  # Opcional: GPU para inferencia más rápida
+    networks:
+      - agent-pc-net
+
+  # ============================================
+  # 4. Tailscale — VPN Mesh (Opcional) 🔐
+  # ============================================
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: agent-pc-tailscale
+    restart: unless-stopped
+    profiles:
+      - tailscale  # Solo se inicia con: docker compose --profile tailscale up
+    network_mode: host
+    volumes:
+      - tailscale-data:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      TS_AUTHKEY: "${TS_AUTHKEY:-}"
+      TS_HOSTNAME: "${TS_HOSTNAME:-agent-pc}"
+      TS_STATE_DIR: "/var/lib/tailscale"
+      TS_USERSPACE: "false"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    privileged: true
+
+# ============================================
+# Volúmenes persistentes
+# ============================================
+volumes:
+  open-webui-data:
+    name: agent-pc-webui-data
+  ollama-data:
+    name: agent-pc-ollama-data
+  tailscale-data:
+    name: agent-pc-tailscale-data
+
+# ============================================
+# Red interna para comunicación entre servicios
+# ============================================
+networks:
+  agent-pc-net:
+    name: agent-pc-network
+    driver: bridge

@@ -1,0 +1,107 @@
+{
+  "_info": "Agent-PC Tools para Open WebUI — Importa este archivo desde Admin Panel > Functions",
+  "name": "Agent-PC Tools",
+  "description": "Herramientas para controlar la máquina host desde Open WebUI. Requiere Agent-PC Server corriendo en Docker.",
+  "endpoint": "http://agent-pc:8765",
+  "secret": "${AUTH_SECRET}",
+  "tools": [
+    {
+      "name": "execute_command",
+      "description": "Ejecuta un comando shell en la máquina Linux host. Usa esto para operaciones del sistema como ver espacio en disco, listar procesos, instalar paquetes, etc.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "El comando shell a ejecutar (ej: 'df -h', 'ls -la /home', 'ps aux')"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Timeout en segundos (default: 30, max: 120)"
+          }
+        },
+        "required": ["command"]
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "Lee el contenido de un archivo del host. Para archivos grandes, especifica start_line y end_line.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta absoluta del archivo a leer (ej: '/home/usuario/proyecto/main.py')"
+          },
+          "start_line": {
+            "type": "integer",
+            "description": "Línea inicial (1-based, opcional)"
+          },
+          "end_line": {
+            "type": "integer",
+            "description": "Línea final (1-based, opcional)"
+          }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Escribe o crea un archivo en el host. Crea directorios padres si no existen.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta absoluta del archivo a escribir"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenido a escribir en el archivo"
+          }
+        },
+        "required": ["path", "content"]
+      }
+    },
+    {
+      "name": "list_directory",
+      "description": "Lista el contenido de un directorio en el host.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta absoluta del directorio a listar"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Patrón glob opcional (ej: '*.py', '*.md')"
+          }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "search_files",
+      "description": "Busca archivos que contengan un patrón de texto (usa grep).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Patrón regex o texto a buscar"
+          },
+          "directory": {
+            "type": "string",
+            "description": "Directorio donde buscar (default: workspace root)"
+          },
+          "file_pattern": {
+            "type": "string",
+            "description": "Filtro de archivos (ej: '*.py', '*.md')"
+          }
+        },
+        "required": ["pattern"]
+      }
+    }
+  ]
+}
