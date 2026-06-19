@@ -143,3 +143,42 @@ sudo tailscale up
 # Re-apply serve config
 tailscale serve --bg http://127.0.0.1:3000
 ```
+
+### 7. Configure Notes Prompt (AI Context)
+
+The notes prompt is the `.cursorrules` equivalent for Open WebUI — it gives the AI perpetual context about your notes vault, projects, working style, and preferences.
+
+```bash
+# 1. Customize the template
+nano open-webui/notes-prompt.md
+# Edit paths, vault location, projects, and preferences
+```
+
+```
+# 2. In Open WebUI:
+Admin Panel → Settings → Interface → System Prompt
+→ Paste the entire content of open-webui/notes-prompt.md
+→ Save
+```
+
+**Why this matters:** Without a system prompt, every new chat starts blank — the AI doesn't know where your notes are, what projects you're working on, or how you prefer to work. The system prompt is the AI's long-term memory. Update it whenever your workflow, paths, or projects change.
+
+**What to include:**
+- Notes vault path and structure (Obsidian)
+- Daily/weekly note templates
+- Project directories and how to plan/track them
+- Working capacity (hours per day/week)
+- Language preferences
+- Personalization profile path (for life/work advice)
+- Other important paths (dotfiles, projects, etc.)
+
+#### System Prompt not working
+
+```bash
+# Verify the prompt is set:
+# Open WebUI → Admin Panel → Settings → Interface → System Prompt
+# Should show your content, not be empty
+
+# Test: start a new chat and ask "Where are my notes?"
+# The AI should know the path from your system prompt
+```

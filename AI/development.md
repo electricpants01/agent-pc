@@ -20,6 +20,7 @@ agent-pc/
 │   ├── setup.sh                 ← [LEGACY] Non-Docker install
 │   └── agent-pc.service         ← [LEGACY] systemd service
 ├── open-webui/
+│   ├── notes-prompt.md          ← Notes prompt template (AI context for Open WebUI)
 │   └── tools/
 │       ├── agent-pc-tools.json  ← Tool definitions (JSON import)
 │       └── agent-pc-tools.py   ← Tool functions (Python import, preferred)

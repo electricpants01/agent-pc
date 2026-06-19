@@ -129,6 +129,33 @@ https://<your-tailnet-name>.ts.net  (your server's Tailscale magic DNS name)
 
 **Tip:** In Safari on iPhone, press Share → "Add to Home Screen" to install it as an app.
 
+### 7. Configure Notes Prompt (AI Context)
+
+Give your AI assistant perpetual context — like `.cursorrules` but for Open WebUI. The notes prompt tells the AI about your notes vault, projects, working style, and preferences. You never have to explain "where are my notes?" or "what am I working on?" in every new chat.
+
+```bash
+# 1. Customize the notes prompt template
+nano open-webui/notes-prompt.md
+```
+
+Edit the paths and details to match your system. The template includes:
+- Notes vault location and structure (daily, weekly, projects)
+- How to add/read notes and project plans
+- Working capacity (4h/day, 28h/week, max 3 active projects)
+- Language preferences (Spanish for notes, English for code)
+- Personalization profile path
+
+```
+# 2. In Open WebUI:
+Admin Panel → Settings → Interface → System Prompt
+→ Paste the entire content of open-webui/notes-prompt.md
+→ Save
+```
+
+That's it — every new chat now starts with full context.
+
+> 💡 **Tip:** Update the system prompt whenever your workflow or paths change. It's your AI's long-term memory.
+
 ---
 
 ## 🛠️ Agent-PC Server (Tool Engine)
