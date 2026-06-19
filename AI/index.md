@@ -32,5 +32,6 @@ Structured documentation for AI agents (Cline, Cursor, Copilot, etc.) to quickly
 - **Agent-PC Server** (Docker, port 8765) = tool executor (NO LLM)
 - **Tailscale** = VPN for iPhone access
 - **Tools** = execute_command, read_file, write_file, list_directory, search_files
+- **Tool files** = `open-webui/tools/agent-pc-tools.json` (JSON import) + `agent-pc-tools.py` (Python function import)
 - **Auth** = AUTH_SECRET shared between Open WebUI and Agent-PC
 - **Code** = Python 3.11 + FastAPI, English for code, English for comments

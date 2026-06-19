@@ -86,12 +86,14 @@ Agent-PC is a system for controlling a Linux machine remotely using conversation
 - **Port:** 3000 → 8080 (internal)
 - **Persistence:** Docker volume `open-webui-data`
 - **Auth:** Local user accounts + per-provider API keys
+- **Tool files:** `open-webui/tools/agent-pc-tools.json` (JSON import) and `open-webui/tools/agent-pc-tools.py` (Python function import)
 
 ### Agent-PC Server (Tool Engine)
 - **Image:** Custom Dockerfile (Python 3.11-slim)
 - **Role:** Executes tools on the host
 - **Port:** 8765
 - **Auth:** `AUTH_SECRET` shared via query param
+- **Note:** `server/agent.py` exists as defunct legacy code (LLM client from v1.x) — it is NOT imported or used in production. It should be removed as it imports `openai` which violates the architecture rules.
 
 ### Available Tools
 

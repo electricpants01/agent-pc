@@ -7,6 +7,22 @@
 - **Documentation:** English
 - **Commits:** English (conventional commits)
 
+## Known Violations (Tech Debt)
+
+The following files currently violate the English-only convention and need cleanup:
+
+| File | Issue |
+|------|-------|
+| `server/requirements.txt` | Spanish comments on lines 2-4 ("Dependencias", "Solo tool execution engine — sin cliente LLM") |
+| `server/agent.py` | Spanish on line 148 ("Demasiadas rondas de herramientas. Posible loop.") |
+| `server/setup.sh` | Entire script in Spanish (install messages, prompts) |
+
+## Security
+
+- **NO hardcoded secrets in source files.** Currently `open-webui/tools/agent-pc-tools.py:16` hardcodes `AUTH_SECRET` — this should use `os.getenv("AUTH_SECRET")`.
+- API keys for LLM providers are managed exclusively through the Open WebUI admin panel.
+- The `AUTH_SECRET` shared between Open WebUI and Agent-PC is set in `.env` (not committed).
+
 ## Python
 
 ### Style
@@ -34,7 +50,7 @@
 
 ## Open WebUI
 
-- Tools in `open-webui/tools/` in JSON format
+- Tools in `open-webui/tools/` in JSON and Python format (`agent-pc-tools.json` for JSON import, `agent-pc-tools.py` for Python function import)
 - API keys configured from admin panel (never in files)
 - Functions use HTTP POST to `http://agent-pc:8765/tool`
 

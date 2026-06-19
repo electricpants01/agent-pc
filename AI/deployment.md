@@ -72,7 +72,8 @@ docker compose logs agent-pc
    - Add DeepSeek: `https://api.deepseek.com/v1` + API key
    - If using Ollama: `http://ollama:11434`
 4. **Admin Panel → Workspace → Functions:**
-   - Import `open-webui/tools/agent-pc-tools.json`
+   - Import `open-webui/tools/agent-pc-tools.json` (JSON import)
+   - OR import `open-webui/tools/agent-pc-tools.py` (Python function import, preferred)
    - Set `AUTH_SECRET` variable
 
 ### 6. Configure Tailscale (Remote Access)
